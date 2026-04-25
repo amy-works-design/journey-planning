@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>JOURNEYプランニングシート</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --burgundy: #7B2D3E;
+  --gold: #C9963A;
+  --cream: #FDF8F0;
+  --dark: #1A1008;
+  --mid: #5C3D1E;
+  --border: #E8D8B0;
+  --teal: #4BA8A0;
+  --red: #C0392B;
+}
+
+/* ══════════════════════════════════
+   画面表示用
+══════════════════════════════════ */
+body {
+  background: #d8d0c0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  font-family: 'Noto Sans JP', sans-serif;
+  gap: 16px;
+}
+
+.control-panel {
+  width: 210mm;
+  background: #fff;
+  border: 1.5px solid #ddd;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.control-label { font-size: 9pt; font-weight: 700; color: #555; white-space: nowrap; }
+
+.selector-btn {
+  padding: 4px 12px;
+  border: 2px solid #ddd;
+  background: #fff;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 9pt; font-weight: 700; color: #777;
+  cursor: pointer; transition: all 0.15s; border-radius: 3px;
+}
+.selector-btn:hover { border-color: var(--burgundy); color: var(--burgundy); }
+.selector-btn.active { background: var(--burgundy); color: #fff; border-color: var(--burgundy); }
+
+.upload-btn {
+  padding: 4px 12px;
+  border: 2px solid var(--teal); background: #fff;
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 9pt; font-weight: 700; color: var(--teal);
+  cursor: pointer; border-radius: 3px; transition: all 0.15s;
+}
+.upload-btn:hover { background: var(--teal); color: #fff; }
+.control-sep { width: 1px; height: 22px; background: #ddd; margin: 0 4px; }
+
+/* ══════════════════════════════════
+   A4ページ本体
+══════════════════════════════════ */
+.page {
+  width: 210mm;
+  height: 297mm;          /* ← 固定高さでA4に収める */
+  background: var(--cream);
+  padding: 8mm 11mm 8mm;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 3mm;
+  /* 印刷時の背景色を強制的に出す */
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  color-adjust: exact;
+}
+
+/* 上下のボーダーライン */
+.page::before, .page::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; height: 5px;
+  background: linear-gradient(90deg, var(--burgundy), var(--gold), var(--burgundy));
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.page::before { top: 0; }
+.page::after  { bottom: 0; }
+
+/* ── HEADER ── */
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-bottom: 3mm; border-bottom: 2px solid var(--gold);
+  flex-shrink: 0;
+}
+.logo-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 17pt; font-weight: 900; color: var(--burgundy); letter-spacing: 0.1em;
+}
+.logo-sub { font-size: 6.5pt; color: var(--mid); letter-spacing: 0.1em; margin-top: 0.5mm; }
+.sheet-title { font-size: 12pt; font-weight: 900; color: var(--dark); letter-spacing: 0.05em; text-align: right; }
+.sheet-date-input {
+  font-family: 'Noto Sans JP', sans-serif; font-size: 8pt; color: #999;
+  text-align: right; width: 55mm; margin-top: 1mm; display: block;
+}
+
+/* ── NAME ROW ── */
+.name-row {
+  display: flex; align-items: center; gap: 3mm;
+  background: var(--burgundy); padding: 2.5mm 5mm; color: #fff;
+  flex-shrink: 0;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.name-input {
+  flex: 1; background: transparent; border: none;
+  border-bottom: 1.5px solid rgba(255,255,255,0.5);
+  color: #fff; font-family: 'Noto Sans JP', sans-serif;
+  font-size: 13pt; font-weight: 700; padding: 1mm 2mm; outline: none;
+}
+.name-input::placeholder { color: rgba(255,255,255,0.4); font-size: 9pt; font-weight: 400; }
+.name-suffix { font-size: 10pt; font-weight: 700; white-space: nowrap; }
+.sub-label { font-size: 7.5pt; color: rgba(255,255,255,0.8); margin-left: auto; white-space: nowrap; }
+
+/* ── SECTION HEADER ── */
+.section-header { display: flex; align-items: center; gap: 2mm; margin-bottom: 1.5mm; }
+.section-badge {
+  background: var(--gold); color: var(--dark);
+  font-size: 7pt; font-weight: 900; padding: 1mm 3mm; letter-spacing: 0.1em;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.section-title-text { font-size: 9pt; font-weight: 700; color: var(--dark); }
+
+/* ── CALENDAR ── */
+.calendar-wrap { flex-shrink: 0; }
+.calendar-area {
+  border: 2px dashed var(--border); background: #fff;
+  position: relative; height: 58mm;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; overflow: hidden;
+}
+.calendar-area:hover { border-color: var(--teal); background: #f0fafa; }
+#calendarImg { width: 100%; height: 100%; object-fit: contain; display: none; }
+.calendar-placeholder { text-align: center; color: #bbb; pointer-events: none; }
+.calendar-placeholder-icon { font-size: 20pt; margin-bottom: 2mm; }
+.calendar-placeholder-text { font-size: 7.5pt; line-height: 1.7; }
+
+.event-count-row { display: flex; align-items: center; gap: 3mm; margin-top: 1.5mm; }
+.event-count-label { font-size: 7.5pt; color: var(--mid); font-weight: 500; }
+.event-count-input-wrap {
+  display: flex; align-items: center; gap: 2mm; background: #fff;
+  border: 2px solid var(--teal); border-radius: 20px; padding: 0.8mm 4mm;
+}
+.event-count-input {
+  width: 28px; border: none; outline: none;
+  font-family: 'Playfair Display', serif; font-size: 13pt; font-weight: 700;
+  color: var(--teal); text-align: center; background: transparent;
+}
+.event-count-unit { font-size: 7.5pt; color: var(--teal); font-weight: 700; }
+
+/* ── PLAN ── */
+.plan-section { flex-shrink: 0; display: flex; flex-direction: column; }
+
+.plan-note {
+  font-size: 7pt; color: var(--mid); margin-bottom: 1.5mm; line-height: 1.5;
+  padding: 1.5mm 3mm; border-left: 3px solid var(--gold); background: #fffbf0;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+
+.plan-cards { display: grid; gap: 3mm; flex: 1; }
+.plan-cards.one-plan  { grid-template-columns: 1fr; }
+.plan-cards.two-plans { grid-template-columns: 1fr 1fr; }
+
+.plan-card {
+  border: 2.5px solid var(--border); background: #fff;
+  overflow: hidden; position: relative;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.plan-card.recommended {
+  border-color: var(--gold);
+  background: linear-gradient(160deg, #fffdf5, #fff8e8);
+}
+
+.plan-card-header {
+  background: var(--burgundy); color: #fff; padding: 2.5mm 4mm;
+  display: flex; align-items: center; justify-content: space-between;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.plan-card.recommended .plan-card-header {
+  background: linear-gradient(90deg, var(--burgundy), #a03050);
+}
+.plan-name-badge { font-size: 10.5pt; font-weight: 900; letter-spacing: 0.06em; }
+
+.plan-card-body { padding: 3mm 4mm; }
+
+.plan-price-row { display: flex; align-items: baseline; gap: 2mm; margin-bottom: 1mm; }
+.plan-price-label { font-size: 7pt; color: var(--mid); font-weight: 500; }
+.plan-price-value {
+  font-family: 'Playfair Display', serif; font-size: 19pt;
+  font-weight: 700; color: var(--burgundy); line-height: 1;
+}
+.plan-price-tax { font-size: 7pt; color: var(--mid); }
+
+.plan-savings {
+  display: inline-block; background: var(--burgundy); color: #fff;
+  font-size: 7.5pt; font-weight: 700; padding: 0.8mm 3mm; margin-bottom: 2mm;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+
+.plan-divider { border: none; border-top: 1px solid var(--border); margin: 1.5mm 0; }
+
+.plan-detail-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1mm; font-size: 8pt; }
+.plan-detail-label { color: var(--mid); font-weight: 500; }
+.plan-detail-value { font-weight: 700; color: var(--dark); }
+.plan-detail-value.discount { color: var(--red); }
+
+.plan-total-row {
+  background: var(--cream); border: 1.5px solid var(--border);
+  padding: 2mm 3mm; display: flex; justify-content: space-between;
+  align-items: center; margin-top: 1.5mm;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.plan-total-label { font-size: 7.5pt; font-weight: 700; color: var(--dark); }
+.plan-total-value {
+  font-family: 'Playfair Display', serif; font-size: 14pt;
+  font-weight: 700; color: var(--burgundy);
+}
+
+/* チケット枠 */
+.ticket-box {
+  border: 2.5px solid var(--border); background: #fff;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.ticket-box-body { padding: 3mm 4mm; }
+.ticket-desc {
+  font-size: 8pt; color: var(--mid); font-weight: 500;
+  margin-bottom: 2.5mm; text-align: center;
+}
+.ticket-chips { display: flex; gap: 3mm; }
+.ticket-chip {
+  flex: 1; border: 1.5px solid var(--border);
+  padding: 2.5mm 3mm; background: var(--cream); text-align: center;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.ticket-chip-label { font-size: 8pt; color: var(--mid); font-weight: 700; margin-bottom: 1.5mm; }
+.ticket-chip-price {
+  font-family: 'Playfair Display', serif; font-size: 13pt;
+  font-weight: 700; color: var(--burgundy);
+}
+.ticket-chip-unit { font-size: 8pt; color: var(--mid); }
+.ticket-chip-value { font-size: 11pt; font-weight: 700; color: var(--burgundy); }
+
+/* ＋記号 */
+.plus-sign {
+  text-align: center; font-size: 16pt; font-weight: 900;
+  color: var(--mid); line-height: 1; padding: 1.5mm 0;
+}
+
+/* ── MEMO ── */
+.memo-area {
+  border: 1.5px solid var(--border); background: #fff; padding: 2.5mm 4mm;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 12mm;
+  -webkit-print-color-adjust: exact; print-color-adjust: exact;
+}
+.memo-label { font-size: 7pt; font-weight: 700; color: var(--mid); margin-bottom: 1.5mm; flex-shrink: 0; }
+.memo-input {
+  width: 100%; border: none; outline: none;
+  font-family: 'Noto Sans JP', sans-serif; font-size: 8.5pt; color: var(--dark);
+  resize: none; background: transparent; line-height: 2;
+  background-image: repeating-linear-gradient(
+    transparent, transparent calc(2em - 1px),
+    var(--border) calc(2em - 1px), var(--border) 2em
+  );
+  flex: 1;
+  height: 0;
+}
+
+/* ── FOOTER ── */
+.footer {
+  padding-top: 2.5mm; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0;
+}
+.footer-brand {
+  font-family: 'Playfair Display', serif; font-size: 10pt;
+  font-weight: 700; color: var(--burgundy); letter-spacing: 0.1em;
+}
+.footer-note { font-size: 6pt; color: #aaa; }
+
+/* ══════════════════════════════════
+   印刷設定
+══════════════════════════════════ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  html, body {
+    width: 210mm;
+    height: 297mm;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    gap: 0 !important;
+  }
+  .control-panel { display: none !important; }
+  .page {
+    box-shadow: none !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    position: fixed;
+    top: 0; left: 0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  /* 背景色・背景画像を強制出力 */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- 操作パネル（印刷時非表示） -->
+<div class="control-panel">
+  <span class="control-label">📋 表示プラン：</span>
+  <button class="selector-btn active" onclick="showPlan('basic', this)">ベーシック</button>
+  <button class="selector-btn" onclick="showPlan('light', this)">ライト</button>
+  <button class="selector-btn" onclick="showPlan('plus', this)">プラス</button>
+  <button class="selector-btn" onclick="showPlan('both', this)">両方表示</button>
+  <div class="control-sep"></div>
+  <span class="control-label">📅 カレンダー：</span>
+  <button class="upload-btn" onclick="document.getElementById('fileInput').click()">📁 画像をアップロード</button>
+  <input type="file" id="fileInput" accept="image/*" onchange="loadCalendar(event)" style="display:none;" />
+  <div class="control-sep"></div>
+  <button class="upload-btn" onclick="window.print()" style="border-color:#888; color:#555;">🖨️ PDF出力</button>
+</div>
+
+<!-- A4ページ -->
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="logo-text">JOURNEY</div>
+      <div class="logo-sub">English Bilingual Community</div>
+    </div>
+    <div>
+      <div class="sheet-title">おすすめプランニングシート</div>
+      <div class="sheet-date-input" id="sheetDate"></div>
+    </div>
+  </div>
+
+  <!-- NAME ROW -->
+  <div class="name-row">
+    <span style="font-size:9pt;">📋</span>
+    <input class="name-input" type="text" placeholder="お名前を入力" />
+    <span class="name-suffix">さんへのご提案</span>
+    <span class="sub-label">過去の実績をもとにご提案します</span>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="calendar-wrap">
+    <div class="section-header">
+      <span class="section-badge">SCHEDULE</span>
+      <span class="section-title-text">過去のスケジュール</span>
+    </div>
+    <div class="calendar-area" id="calendarArea" onclick="document.getElementById('fileInput').click()">
+      <img id="calendarImg" src="" alt="カレンダー" />
+      <div class="calendar-placeholder" id="calendarPlaceholder">
+        <div class="calendar-placeholder-icon">📅</div>
+        <div class="calendar-placeholder-text">ここをクリック または 上のボタンから<br>カレンダー画像をアップロード</div>
+      </div>
+    </div>
+    <div class="event-count-row">
+      <span class="event-count-label">📌 対象月のカジュアルイベント参加回数：</span>
+      <div class="event-count-input-wrap">
+        <input class="event-count-input" type="number" min="0" max="30" value="5" />
+        <span class="event-count-unit">回 / 月</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PLAN SECTION -->
+  <div class="plan-section">
+    <div class="section-header">
+      <span class="section-badge">PLAN</span>
+      <span class="section-title-text" id="planSectionTitle">おすすめプラン（会費込み）</span>
+    </div>
+    <div class="plan-note" id="planNote" style="display:none;">
+      ※月により変動が見られますのでご希望のプランを当月スケジュールに合わせてお選びください。
+    </div>
+
+    <div class="plan-cards one-plan" id="planCards">
+
+      <!-- ベーシックプラン -->
+      <div id="cardBasic" style="display:flex; flex-direction:column; gap:0; width:100%;">
+        <div class="plan-card">
+          <div class="plan-card-header">
+            <span class="plan-name-badge">🌱 ベーシックプラン</span>
+          </div>
+          <div class="plan-card-body">
+            <div class="plan-price-row">
+              <span class="plan-price-label">月額</span>
+              <span class="plan-price-value">¥19,800</span>
+              <span class="plan-price-tax">（税込）</span>
+            </div>
+            <hr class="plan-divider">
+            <div class="plan-detail-row">
+              <span class="plan-detail-label">基本セット（会費）</span>
+              <span class="plan-detail-value">¥19,800</span>
+            </div>
+            <div class="plan-total-row">
+              <span class="plan-total-label">月額合計</span>
+              <span class="plan-total-value">¥19,800</span>
+            </div>
+          </div>
+        </div>
+        <div class="plus-sign">＋</div>
+        <div class="ticket-box">
+          <div class="ticket-box-body">
+            <div class="ticket-desc">ご希望の日数分 都度チケットを購入してご参加ください。</div>
+            <div class="ticket-chips">
+              <div class="ticket-chip">
+                <div class="ticket-chip-label">カジュアルイベント（単発）</div>
+                <span class="ticket-chip-price">¥1,320</span><span class="ticket-chip-unit">　/ 回</span>
+              </div>
+              <div class="ticket-chip">
+                <div class="ticket-chip-label">プレミアムイベント</div>
+                <div class="ticket-chip-value">イベントごとに設定</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ライトプラン -->
+      <div id="cardLight" style="display:none; flex-direction:column; gap:0; width:100%;">
+        <div class="plan-card">
+          <div class="plan-card-header">
+            <span class="plan-name-badge">🌿 ライトプラン</span>
+          </div>
+          <div class="plan-card-body">
+            <div class="plan-price-row">
+              <span class="plan-price-label">月額</span>
+              <span class="plan-price-value">¥24,000</span>
+              <span class="plan-price-tax">（税込）</span>
+            </div>
+            <div class="plan-savings">都度払いより ¥1,080 お得</div>
+            <hr class="plan-divider">
+            <div class="plan-detail-row">
+              <span class="plan-detail-label">基本セット（会費）</span>
+              <span class="plan-detail-value">¥19,800</span>
+            </div>
+            <div class="plan-detail-row">
+              <span class="plan-detail-label">カジュアルイベント×4回</span>
+              <span class="plan-detail-value">¥5,280</span>
+            </div>
+            <div class="plan-detail-row">
+              <span class="plan-detail-label">パッケージ割引</span>
+              <span class="plan-detail-value discount">－¥1,080</span>
+            </div>
+            <div class="plan-total-row">
+              <span class="plan-total-label">月額合計</span>
+              <span class="plan-total-value">¥24,000</span>
+            </div>
+          </div>
+        </div>
+        <div class="ticket-addon-single">
+          <div class="plus-sign">＋</div>
+          <div class="ticket-box">
+            <div class="ticket-box-body">
+              <div class="ticket-desc">ご希望の日数分 都度チケットを購入してご参加ください。</div>
+              <div class="ticket-chips">
+                <div class="ticket-chip">
+                  <div class="ticket-chip-label">カジュアルイベント（単発）</div>
+                  <span class="ticket-chip-price">¥1,320</span><span class="ticket-chip-unit">　/ 回</span>
+                </div>
+                <div class="ticket-chip">
+                  <div class="ticket-chip-label">プレミアムイベント</div>
+                  <div class="ticket-chip-value">イベントごとに設定</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- プラスプラン -->
+      <div id="cardPlus" style="display:none; flex-direction:column; gap:0; width:100%;">
+        <div class="plan-card recommended">
+          <div class="plan-card-header">
+            <span class="plan-name-badge">✨ プラスプラン</span>
+          </div>
+          <div class="plan-card-body">
+            <div class="plan-price-row">
+              <span class="plan-price-label">月額</span>
+              <span class="plan-price-value">¥26,000</span>
+              <span class="plan-price-tax">（税込）</span>
+            </div>
+            <div class="plan-savings">都度払いより ¥1,720 お得</div>
+            <hr class="plan-divider">
+            <div class="plan-detail-row">
+              <span class="plan-detail-label">基本セット（会費）</span>
+              <span class="plan-detail-value">¥19,800</span>
+            </div>
+            <div class="plan-detail-row">
+              <span class="plan-detail-label">カジュアルイベント×6回</span>
+              <span class="plan-detail-value">¥7,920</span>
+            </div>
+            <div class="plan-detail-row">
+              <span class="plan-detail-label">パッケージ割引</span>
+              <span class="plan-detail-value discount">－¥1,720</span>
+            </div>
+            <div class="plan-total-row">
+              <span class="plan-total-label">月額合計</span>
+              <span class="plan-total-value">¥26,000</span>
+            </div>
+          </div>
+        </div>
+        <div class="ticket-addon-single">
+          <div class="plus-sign">＋</div>
+          <div class="ticket-box">
+            <div class="ticket-box-body">
+              <div class="ticket-desc">ご希望の日数分 都度チケットを購入してご参加ください。</div>
+              <div class="ticket-chips">
+                <div class="ticket-chip">
+                  <div class="ticket-chip-label">カジュアルイベント（単発）</div>
+                  <span class="ticket-chip-price">¥1,320</span><span class="ticket-chip-unit">　/ 回</span>
+                </div>
+                <div class="ticket-chip">
+                  <div class="ticket-chip-label">プレミアムイベント</div>
+                  <div class="ticket-chip-value">イベントごとに設定</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 両方表示用：共通チケット枠 -->
+      <div id="ticketBoth" style="display:none; grid-column:1/-1;">
+        <div class="plus-sign">＋</div>
+        <div class="ticket-box">
+          <div class="ticket-box-body">
+            <div class="ticket-desc">ご希望の日数分 都度チケットを購入してご参加ください。</div>
+            <div class="ticket-chips">
+              <div class="ticket-chip">
+                <div class="ticket-chip-label">カジュアルイベント（単発）</div>
+                <span class="ticket-chip-price">¥1,320</span><span class="ticket-chip-unit">　/ 回</span>
+              </div>
+              <div class="ticket-chip">
+                <div class="ticket-chip-label">プレミアムイベント</div>
+                <div class="ticket-chip-value">イベントごとに設定</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MEMO -->
+  <div class="memo-area">
+    <div class="memo-label">📝 コメント・補足</div>
+    <textarea class="memo-input" placeholder="例）来月はイベントが多いのでライトプランがおすすめです！"></textarea>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-brand">JOURNEY</div>
+    <div class="footer-note">表示価格はすべて税込です　／　ご不明な点はお気軽にご相談ください</div>
+  </div>
+
+</div>
+
+<script>
+// 作成日を自動表示
+(function() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  const d = String(today.getDate()).padStart(2, '0');
+  document.getElementById('sheetDate').textContent = `${y}年${m}月${d}日 作成`;
+})();
+
+function showPlan(mode, btn) {
+  document.querySelectorAll('.selector-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const basic      = document.getElementById('cardBasic');
+  const light      = document.getElementById('cardLight');
+  const plus       = document.getElementById('cardPlus');
+  const ticketBoth = document.getElementById('ticketBoth');
+  const cards      = document.getElementById('planCards');
+  const note       = document.getElementById('planNote');
+  const title      = document.getElementById('planSectionTitle');
+
+  [basic, light, plus, ticketBoth].forEach(c => c.style.display = 'none');
+  document.querySelectorAll('.ticket-addon-single').forEach(el => el.style.display = '');
+  note.style.display = 'none';
+  title.textContent = 'おすすめプラン（会費込み）';
+
+  if (mode === 'basic') {
+    basic.style.display = 'flex';
+    cards.className = 'plan-cards one-plan';
+  } else if (mode === 'light') {
+    light.style.display = 'flex';
+    cards.className = 'plan-cards one-plan';
+  } else if (mode === 'plus') {
+    plus.style.display = 'flex';
+    cards.className = 'plan-cards one-plan';
+  } else if (mode === 'both') {
+    document.querySelectorAll('.ticket-addon-single').forEach(el => el.style.display = 'none');
+    light.style.display = 'flex';
+    plus.style.display = 'flex';
+    ticketBoth.style.display = 'block';
+    cards.className = 'plan-cards two-plans';
+    note.style.display = 'block';
+    title.textContent = 'PLAN：おすすめプラン（会費込み）';
+  }
+}
+
+function loadCalendar(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = document.getElementById('calendarImg');
+    const ph  = document.getElementById('calendarPlaceholder');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+</script>
+</body>
+</html>
